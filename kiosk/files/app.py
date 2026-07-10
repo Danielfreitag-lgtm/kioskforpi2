@@ -263,7 +263,7 @@ def api_create_order():
         sms_result = send_sms_receipt(order_id, queue_number, phone, receipt_url)
 
     if get_setting("sms_enabled", "0") == "1":
-        send_sms_owner_notification(order_id, queue_number, phone, priced_items, total)
+        send_sms_owner_notification(order_id, queue_number, phone, receipt_url)
 
     return jsonify(
         {
@@ -558,7 +558,7 @@ def send_sms_ready(order_id, queue_number, phone):
     return result
 
 
-def send_sms_owner_notification(order_id, queue_number, customer_phone, items, total):
+def send_sms_owner_notification(order_id, queue_number, customer_phone, receipt_url):
     """Text the business owner's phone every time a new order comes in."""
     account_sid = get_setting("twilio_account_sid", "")
     auth_token = get_setting("twilio_auth_token", "")
@@ -569,12 +569,10 @@ def send_sms_owner_notification(order_id, queue_number, customer_phone, items, t
         _mark_sms_status(order_id, "failed", column="owner_sms_status")
         return {"ok": False, "error": "Twilio is not fully configured."}
 
-    lines = [f"{i['qty']}x {i['emoji']} {i['name']}" for i in items]
     contact = f"\nCustomer: {customer_phone}" if customer_phone else ""
     body = (
         f"{business_name}: new order #{queue_number}\n"
-        + "\n".join(lines)
-        + f"\nTotal: ${total:.2f}"
+        f"View receipt: {receipt_url}"
         + contact
     )
 
