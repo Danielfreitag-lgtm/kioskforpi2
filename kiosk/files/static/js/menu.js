@@ -11,6 +11,7 @@
   const overlay = document.getElementById("confirm-overlay");
   const confirmNumber = document.getElementById("confirm-number");
   const confirmSms = document.getElementById("confirm-sms");
+  const confirmReceiptLink = document.getElementById("confirm-receipt-link");
   const confirmClose = document.getElementById("confirm-close-btn");
 
   function fmt(n) {
@@ -115,11 +116,12 @@
       }
 
       confirmNumber.textContent = data.queue_number;
+      confirmReceiptLink.href = data.receipt_url || "#";
       if (phone) {
         if (data.sms && data.sms.ok) {
-          confirmSms.textContent = "Receipt texted to " + phone;
+          confirmSms.textContent = "Receipt link texted to " + phone;
         } else if (data.sms) {
-          confirmSms.textContent = "Order placed — text receipt couldn't be sent.";
+          confirmSms.textContent = "Order placed — text couldn't be sent, but you can still view your receipt below.";
         } else {
           confirmSms.textContent = "";
         }
