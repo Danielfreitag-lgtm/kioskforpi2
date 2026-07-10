@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}{{ business_name }} — Admin{% endblock %}
+{% block body_class %}page-admin{% endblock %}
+{% block content %}
+<div class="admin-shell">
+  <header class="admin-header">
+    <div class="kiosk-brand">
+      <span class="kiosk-brand-mark">🛠️</span>
+      <h1>Admin dashboard</h1>
+    </div>
+    <div class="admin-header-actions">
+      <a class="btn btn-ghost" href="{{ url_for('menu') }}" target="_blank" rel="noopener">View menu</a>
+      <a class="btn btn-ghost" href="{{ url_for('queue_page') }}" target="_blank" rel="noopener">View queue</a>
+      <a class="btn btn-ghost" href="{{ url_for('logout') }}">Sign out</a>
+    </div>
+  </header>
+
+  <nav class="admin-tabs" id="admin-tabs">
+    <button class="admin-tab active" data-tab="queue">Queue</button>
+    <button class="admin-tab" data-tab="menu">Menu items</button>
+    <button class="admin-tab" data-tab="orders">Orders</button>
+    <button class="admin-tab" data-tab="sms">SMS receipts</button>
+  </nav>
+
+  <section class="admin-panel" id="panel-queue">
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <h2>Now serving</h2>
+      </div>
+      <div class="now-serving-display" id="admin-now-serving">--</div>
+      <div class="panel-actions">
+        <button class="btn btn-primary" id="call-next-btn">Call next number</button>
+        <button class="btn btn-danger-ghost" id="reset-queue-btn">Reset queue</button>
+      </div>
+      <h3 class="panel-subhead">Waiting</h3>
+      <div class="waiting-list" id="admin-waiting-list">
+        <p class="empty-state">No one waiting.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="admin-panel" id="panel-menu" hidden>
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <h2>Add a menu item</h2>
+      </div>
+      <form class="menu-form" id="menu-form">
+        <div class="menu-form-row">
+          <label class="field field-emoji">
+            <span>Emoji</span>
+            <input type="text" id="item-emoji" maxlength="4" placeholder="🌮" required>
+          </label>
+          <label class="field field-name">
+            <span>Product name</span>
+            <input type="text" id="item-name" placeholder="Fish Taco" required>
+          </label>
+          <label class="field field-price">
+            <span>Price</span>
+            <input type="number" id="item-price" min="0" step="0.01" placeholder="3.50" required>
+          </label>
+          <button type="submit" class="btn btn-primary">Add item</button>
+        </div>
+        <div class="emoji-picker" id="emoji-picker">
+          <span data-emoji="🌮"></span><span data-emoji="🌯"></span><span data-emoji="🍔"></span>
+          <span data-emoji="🍕"></span><span data-emoji="🍟"></span><span data-emoji="🌭"></span>
+          <span data-emoji="🥪"></span><span data-emoji="🥗"></span><span data-emoji="🍗"></span>
+          <span data-emoji="🍜"></span><span data-emoji="🍣"></span><span data-emoji="🥟"></span>
+          <span data-emoji="🍩"></span><span data-emoji="🧁"></span><span data-emoji="🍦"></span>
+          <span data-emoji="☕"></span><span data-emoji="🥤"></span><span data-emoji="🧃"></span>
+        </div>
+      </form>
+    </div>
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <h2>Current menu</h2>
+      </div>
+      <div class="admin-menu-list" id="admin-menu-list"></div>
+    </div>
+  </section>
+
+  <section class="admin-panel" id="panel-orders" hidden>
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <h2>Recent orders</h2>
+      </div>
+      <div class="orders-table" id="orders-table"></div>
+    </div>
+  </section>
+
+  <section class="admin-panel" id="panel-sms" hidden>
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <h2>SMS receipts (Twilio)</h2>
+      </div>
+      <p class="panel-hint">
+        Enter your Twilio credentials to text customers a receipt with their queue number
+        the moment they order. Get these from your Twilio console.
+      </p>
+      <form class="sms-form" id="sms-form">
+        <label class="field">
+          <span>Business name (shown in texts)</span>
+          <input type="text" id="setting-business-name" placeholder="The Kiosk">
+        </label>
+        <label class="field">
+          <span>Twilio Account SID</span>
+          <input type="text" id="setting-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+        </label>
+        <label class="field">
+          <span>Twilio Auth Token</span>
+          <input type="password" id="setting-token" placeholder="••••••••••••••••">
+          <small id="token-hint" class="field-hint"></small>
+        </label>
+        <label class="field">
+          <span>Twilio phone number (from)</span>
+          <input type="text" id="setting-from" placeholder="+15551234567">
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" id="setting-enabled">
+          <span>Enable SMS receipts</span>
+        </label>
+        <div class="panel-actions">
+          <button type="submit" class="btn btn-primary">Save settings</button>
+        </div>
+      </form>
+      <div class="sms-test">
+        <h3 class="panel-subhead">Send a test text</h3>
+        <div class="menu-form-row">
+          <label class="field field-name">
+            <span>Phone number</span>
+            <input type="tel" id="test-phone" placeholder="+1 555 010 1234">
+          </label>
+          <button type="button" class="btn btn-ghost" id="send-test-btn">Send test</button>
+        </div>
+        <p class="sms-test-result" id="sms-test-result"></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="admin-toast" hidden></div>
+</div>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

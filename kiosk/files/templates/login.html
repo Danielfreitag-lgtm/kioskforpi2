@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block body_class %}page-login{% endblock %}
+{% block content %}
+<div class="login-wrap">
+  <form class="login-card" method="post" action="{{ url_for('login') }}">
+    <div class="login-stub">🎫</div>
+    <h1>Staff sign in</h1>
+    <p class="login-sub">Enter your admin credentials to manage the kiosk.</p>
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+    <label>
+      <span>Username</span>
+      <input type="text" name="username" autocomplete="username" required autofocus>
+    </label>
+    <label>
+      <span>Password</span>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+  </form>
+</div>
+{% endblock %}

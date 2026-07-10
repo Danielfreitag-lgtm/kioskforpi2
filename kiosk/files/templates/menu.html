@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ business_name }} — Menu{% endblock %}
+{% block body_class %}page-menu{% endblock %}
+{% block content %}
+<div class="kiosk-shell">
+  <header class="kiosk-header">
+    <div class="kiosk-brand">
+      <span class="kiosk-brand-mark">🍴</span>
+      <h1>{{ business_name }}</h1>
+    </div>
+    <a class="queue-pill" href="{{ url_for('queue_page') }}" target="_blank" rel="noopener">See queue →</a>
+  </header>
+
+  <main class="menu-grid" id="menu-grid">
+    {% for item in items %}
+    <button class="menu-card" type="button"
+            data-id="{{ item.id }}"
+            data-name="{{ item.name }}"
+            data-price="{{ item.price }}"
+            data-emoji="{{ item.emoji }}">
+      <span class="menu-card-emoji">{{ item.emoji }}</span>
+      <span class="menu-card-name">{{ item.name }}</span>
+      <span class="menu-card-price">${{ "%.2f"|format(item.price) }}</span>
+    </button>
+    {% else %}
+    <p class="empty-state">No items yet — an admin needs to add some in the dashboard.</p>
+    {% endfor %}
+  </main>
+
+  <aside class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h2>Your order</h2>
+      <span class="cart-count" id="cart-count">0</span>
+    </div>
+    <div class="cart-lines" id="cart-lines">
+      <p class="cart-empty" id="cart-empty">Tap items to add them here.</p>
+    </div>
+    <div class="cart-footer">
+      <label class="cart-phone-label">
+        <span>Phone for SMS receipt <em>(optional)</em></span>
+        <input type="tel" id="cart-phone" placeholder="+1 555 010 1234">
+      </label>
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn btn-primary btn-block" id="place-order-btn" disabled>Place order</button>
+    </div>
+  </aside>
+</div>
+
+<div class="modal-overlay" id="confirm-overlay" hidden>
+  <div class="ticket-modal">
+    <div class="ticket-modal-emoji" id="confirm-emoji">🎫</div>
+    <p class="ticket-modal-label">Your number</p>
+    <div class="ticket-modal-number" id="confirm-number">--</div>
+    <p class="ticket-modal-sms" id="confirm-sms"></p>
+    <button class="btn btn-primary btn-block" id="confirm-close-btn">New order</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/menu.js') }}"></script>
+{% endblock %}

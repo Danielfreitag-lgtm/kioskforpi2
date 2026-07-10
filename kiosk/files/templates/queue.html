@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ business_name }} — Queue{% endblock %}
+{% block body_class %}page-queue{% endblock %}
+{% block content %}
+<div class="queue-shell">
+  <p class="queue-brand">{{ business_name }}</p>
+  <p class="queue-label">Now serving</p>
+  <div class="queue-ticket">
+    <span id="now-serving">--</span>
+  </div>
+  <div class="queue-upnext">
+    <p class="queue-upnext-label">Up next</p>
+    <div class="queue-upnext-numbers" id="upnext-numbers">
+      <span class="queue-dim">—</span>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/queue.js') }}"></script>
+{% endblock %}
