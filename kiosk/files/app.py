@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import json
+import secrets
 from datetime import datetime
 from functools import wraps
 
@@ -90,6 +91,8 @@ def init_db():
         db.execute("ALTER TABLE orders ADD COLUMN ready_sms_status TEXT DEFAULT 'not_sent'")
     if "owner_sms_status" not in existing_cols:
         db.execute("ALTER TABLE orders ADD COLUMN owner_sms_status TEXT DEFAULT 'not_sent'")
+    if "receipt_token" not in existing_cols:
+        db.execute("ALTER TABLE orders ADD COLUMN receipt_token TEXT")
 
     # A few sample menu items so /menu isn't empty on first run
     row = db.execute("SELECT COUNT(*) AS c FROM menu_items").fetchone()
@@ -184,6 +187,19 @@ def queue_page():
     return render_template("queue.html", business_name=business_name)
 
 
+@app.route("/receipt/<token>")
+def view_receipt(token):
+    db = get_db()
+    order = db.execute("SELECT * FROM orders WHERE receipt_token = ?", (token,)).fetchone()
+    business_name = get_setting("business_name", "The Kiosk")
+    if not order:
+        return render_template("receipt.html", order=None, business_name=business_name), 404
+    items = json.loads(order["items_json"])
+    return render_template(
+        "receipt.html", order=order, items=items, business_name=business_name
+    )
+
+
 @app.route("/admin")
 @login_required
 def admin():
@@ -231,18 +247,20 @@ def api_create_order():
     queue_number = int(get_setting("next_queue_number", "1"))
     set_setting("next_queue_number", str(queue_number + 1))
 
+    receipt_token = secrets.token_urlsafe(12)
     created_at = datetime.now().isoformat(timespec="seconds")
     cur = db.execute(
-        "INSERT INTO orders (queue_number, phone, items_json, total, status, sms_status, created_at) "
-        "VALUES (?, ?, ?, ?, 'waiting', 'not_sent', ?)",
-        (queue_number, phone, json.dumps(priced_items), round(total, 2), created_at),
+        "INSERT INTO orders (queue_number, phone, items_json, total, status, sms_status, created_at, receipt_token) "
+        "VALUES (?, ?, ?, ?, 'waiting', 'not_sent', ?, ?)",
+        (queue_number, phone, json.dumps(priced_items), round(total, 2), created_at, receipt_token),
     )
     db.commit()
     order_id = cur.lastrowid
+    receipt_url = request.host_url.rstrip("/") + url_for("view_receipt", token=receipt_token)
 
     sms_result = None
     if phone and get_setting("sms_enabled", "0") == "1":
-        sms_result = send_sms_receipt(order_id, queue_number, phone, priced_items, total)
+        sms_result = send_sms_receipt(order_id, queue_number, phone, receipt_url)
 
     if get_setting("sms_enabled", "0") == "1":
         send_sms_owner_notification(order_id, queue_number, phone, priced_items, total)
@@ -253,6 +271,7 @@ def api_create_order():
             "queue_number": queue_number,
             "total": round(total, 2),
             "items": priced_items,
+            "receipt_url": receipt_url,
             "sms": sms_result,
         }
     )
@@ -463,8 +482,6 @@ def api_admin_sms_test():
         order_id=0,
         queue_number=0,
         phone=phone,
-        items=[{"emoji": "✅", "name": "Test message", "price": 0, "qty": 1, "line_total": 0}],
-        total=0,
         is_test=True,
     )
     return jsonify(result)
@@ -473,7 +490,7 @@ def api_admin_sms_test():
 # ---------------------------------------------------------------------------
 # SMS sending via Twilio
 # ---------------------------------------------------------------------------
-def send_sms_receipt(order_id, queue_number, phone, items, total, is_test=False):
+def send_sms_receipt(order_id, queue_number, phone, receipt_url=None, is_test=False):
     account_sid = get_setting("twilio_account_sid", "")
     auth_token = get_setting("twilio_auth_token", "")
     from_number = get_setting("twilio_from_number", "")
@@ -488,13 +505,10 @@ def send_sms_receipt(order_id, queue_number, phone, items, total, is_test=False)
     if is_test:
         body = f"{business_name}: this is a test message from your kiosk's SMS settings."
     else:
-        lines = [f"{i['qty']}x {i['emoji']} {i['name']} - ${i['line_total']:.2f}" for i in items]
         body = (
-            f"{business_name} receipt\n"
-            f"Your number: {queue_number}\n"
-            + "\n".join(lines)
-            + f"\nTotal: ${total:.2f}\n"
-            "We'll call your number when it's ready!"
+            f"{business_name}: your order #{queue_number} is confirmed! "
+            f"View your receipt: {receipt_url}\n"
+            "We'll text you when it's ready!"
         )
 
     try:
