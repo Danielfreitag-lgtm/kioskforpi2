@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ business_name }} — Receipt{% endblock %}
+{% block body_class %}page-receipt{% endblock %}
+{% block content %}
+<div class="receipt-shell">
+  {% if order %}
+  <div class="receipt-card">
+    <p class="receipt-brand">{{ business_name }}</p>
+    <p class="receipt-label">Order receipt</p>
+    <div class="receipt-number">#{{ order.queue_number }}</div>
+    <div class="receipt-lines">
+      {% for item in items %}
+      <div class="receipt-line">
+        <span class="receipt-line-name">{{ item.qty }}x {{ item.emoji }} {{ item.name }}</span>
+        <span class="receipt-line-price">${{ "%.2f"|format(item.line_total) }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="receipt-total-row">
+      <span>Total</span>
+      <span>${{ "%.2f"|format(order.total) }}</span>
+    </div>
+    <p class="receipt-meta">Placed {{ order.created_at }}</p>
+    <p class="receipt-status">Status: {{ order.status }}</p>
+  </div>
+  {% else %}
+  <div class="receipt-card">
+    <p class="receipt-brand">{{ business_name }}</p>
+    <p class="receipt-label">Receipt not found</p>
+    <p class="receipt-meta">This receipt link is invalid or has expired.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
