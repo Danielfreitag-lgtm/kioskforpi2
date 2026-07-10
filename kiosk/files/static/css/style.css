@@ -279,6 +279,13 @@ button, input { font-family: inherit; }
 .ticket-modal-label { text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.75rem; color: #5c5443; margin: 4px 0 8px; }
 .ticket-modal-number { font-family: var(--mono); font-weight: 700; font-size: 4rem; color: var(--ticket-red); line-height: 1; }
 .ticket-modal-sms { font-size: 0.8rem; color: #5c5443; margin: 14px 0 18px; min-height: 1.2em; }
+.ticket-modal-receipt-link {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ticket-red);
+  text-decoration: underline;
+  margin: 0 0 18px;
+}
 
 /* ==========================================================================
    Queue display (big screen)
@@ -501,6 +508,30 @@ button, input { font-family: inherit; }
   box-shadow: var(--shadow-soft);
   z-index: 60;
 }
+
+/* ==========================================================================
+   Online receipt (viewed via SMS link)
+   ========================================================================== */
+.page-receipt { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.receipt-shell { width: 100%; max-width: 380px; }
+.receipt-card {
+  background: var(--cream);
+  color: #201B0E;
+  padding: 32px 26px;
+  border-radius: 6px;
+  border: 2px dashed #201B0E33;
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+.receipt-brand { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.75rem; color: #5c5443; }
+.receipt-label { font-family: var(--display); font-size: 1.2rem; margin: 6px 0 10px; }
+.receipt-number { font-family: var(--mono); font-weight: 700; font-size: 3rem; color: var(--ticket-red); margin-bottom: 18px; }
+.receipt-lines { display: flex; flex-direction: column; gap: 8px; text-align: left; border-top: 1px dashed #201B0E33; border-bottom: 1px dashed #201B0E33; padding: 14px 0; margin-bottom: 14px; }
+.receipt-line { display: flex; justify-content: space-between; font-size: 0.9rem; }
+.receipt-line-price { font-family: var(--mono); }
+.receipt-total-row { display: flex; justify-content: space-between; font-family: var(--mono); font-weight: 700; font-size: 1.2rem; margin-bottom: 14px; }
+.receipt-meta { font-size: 0.78rem; color: #5c5443; margin: 4px 0; }
+.receipt-status { font-size: 0.85rem; text-transform: capitalize; font-weight: 600; }
 
 /* ==========================================================================
    Responsive
